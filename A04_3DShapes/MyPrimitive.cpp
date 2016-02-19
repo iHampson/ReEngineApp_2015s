@@ -30,6 +30,17 @@ void MyPrimitive::AddQuad(vector3 a_vBottomLeft, vector3 a_vBottomRight, vector3
 	AddVertexPosition(a_vBottomRight);
 	AddVertexPosition(a_vTopRight);
 }
+/// Added by Ian Hampson
+/*
+	Creates A TRI of b_left->b_Right->t_Center
+	follows the right hand rule of OpenGL
+*/
+void MyPrimitive::AddTri(vector3 b_Left, vector3 b_Right, vector3 t_Center)
+{
+	AddVertexPosition(b_Left);
+	AddVertexPosition(b_Right);
+	AddVertexPosition(t_Center);
+}
 void MyPrimitive::GeneratePlane(float a_fSize, vector3 a_v3Color)
 {
 	if (a_fSize < 0.01f)
@@ -109,19 +120,38 @@ void MyPrimitive::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivis
 	Release();
 	Init();
 
-	//Your code starts here
-	float fValue = 0.5f;
-	//3--2
-	//|  |
-	//0--1
-	vector3 point0(-fValue, -fValue, fValue); //0
-	vector3 point1(fValue, -fValue, fValue); //1
-	vector3 point2(fValue, fValue, fValue); //2
-	vector3 point3(-fValue, fValue, fValue); //3
+	/// My code starts here
+	float fRad = 0.5f*a_fRadius;
+	float fHeight = 0.5f*a_fHeight;
+	float degreeDif = 360 / a_nSubdivisions;
+	bool center = (a_nSubdivisions <= 4) ? false : true;
 
-	AddQuad(point0, point1, point3, point2);
+	std::vector<vector3> verts;
+	vector3 cTip(0, fHeight, 0);
+	vector3 cBase(0.0f, -1 * fHeight, 0.0f);
+	/// Adding vectors to verts
+	for (int i = 0; i <= a_nSubdivisions; i++) {
+		vector3 temp(fRad * cos(i*degreeDif * PI/180), -fHeight, fRad * sin(i*degreeDif * PI/180));
+		verts.push_back(temp);
+	}
+	/*	std::cout << "There are " << a_nSubdivisions + 2 << " vertecies." << std::endl;
+	for (vector3 v : verts)	{	std::cout << v.x << "," << v.y << "," << v.z << std::endl;	}	*/
+	for (int j = 0; j <= a_nSubdivisions; j++){
+		if (j == a_nSubdivisions){
+			AddTri(verts[j], verts[0], cTip);
+		}	else{
+			AddTri(verts[j], verts[j + 1], cTip);
+		}
+	}
 
-	//Your code ends here
+	for (int k = 0; k <= a_nSubdivisions; k++){
+		if (k == a_nSubdivisions){
+			AddTri(verts[k], verts[0], cTip);
+		}	else{
+			AddTri(verts[k], verts[k + 1], cBase);
+		}
+	}
+	/// My code ends here
 	CompileObject(a_v3Color);
 }
 void MyPrimitive::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color)
