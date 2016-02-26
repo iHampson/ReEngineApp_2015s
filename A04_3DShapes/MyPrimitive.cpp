@@ -354,44 +354,62 @@ void MyPrimitive::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a
 	Init();
 
 	/// My code starts here
+	/// Think about using a 2d array from the heap to store things in rings that I can access
 	float fRad = 0.5f*a_fRadius;
-	float radDiff = (360 / a_nSubdivisions) * (PI/180);
+	float radRingDiff = (360 / a_nSubdivisions) * (PI/180);
 
 	std::vector<vector3> verts;
+	/*vector3* *arrayVerts = new vector3*[a_nSubdivisions];
+	for (int k = 0; k < a_nSubdivisions;k++) {
+		arrayVerts[k] = new vector3[a_nSubdivisions];
+	}*/
 	vector3 cTop(0, fRad, 0);
 	vector3 cBot(0.0f, -fRad, 0.0f);
 
-	for (int i = 0; i <= a_nSubdivisions; i++) {
+	for (int i = 1; i < a_nSubdivisions; i++) {
+		float step = 90 - (i*(180/a_nSubdivisions));
+
 		for (int j = 0; j <= a_nSubdivisions; j++) {
 			float x, y, z; // Coords
 			// Angles in Radians
-			float step = i*radDiff;
-			float ring = j*radDiff;
+			
+			float ring = j*radRingDiff;
 
-			x = fRad*cos(step)*sin(ring);
-			y = fRad*sin(step)*sin(ring);
-			z = fRad*cos(ring);
+			x = cos(ring)*sin(step);
+			y = sin(ring)*sin(step);
+			z = cos(step);
 			vector3 temp(x, y, z);
-			verts.push_back(temp);
+			verts.push_back(temp*fRad);
+			//arrayVerts[i - 1][j] = temp;
 		}
-		break;
 	}
 	for each (vector3 v in verts)
 	{
 		std::cout << v.x << " , " << v.y << " , " << v.z << std::endl;
 	}
 
-	for (int i = 0;i <= verts.size();i++) {
-		if (i == verts.size()-1) {
-			AddTri(verts[i], verts[0], vector3(0, 0, 0));
+	for (int i = 1;i < verts.size();i++) {
+		/*if (i == verts.size()-1) {
+			AddTri(verts[], verts[0], vector3(0, 0, 0));
 			AddTri(vector3(0, 0, 0), verts[0], verts[i]);
 		}
 		else {
-			AddTri(verts[i], verts[i + 1], vector3(0, 0, 0));
-			AddTri(vector3(0, 0, 0), verts[i+1], verts[i]);
+			AddTri(verts[i-1], verts[i], vector3(0, 0, 0));
+			AddTri(vector3(0, 0, 0), verts[i], verts[i-1]);
+		}*/
+		if (i < a_nSubdivisions) {
+			AddTri(verts[i - 1], verts[i], cTop);
+			AddTri(cTop, verts[i], verts[i - 1]);
+		}
+		else if (i>((a_nSubdivisions*a_nSubdivisions) - a_nSubdivisions)) {
+			AddTri(verts[i - 1], verts[i], cBot);
+			AddTri(cBot, verts[i], verts[i - 1]);
 		}
 	}
-
+	//for (int k = 0; k < a_nSubdivisions;k++) {
+	//	delete[] arrayVerts[k];
+	//}
+	//delete[] arrayVerts;
 	/// My code ends here
 	CompileObject(a_v3Color);
 }
