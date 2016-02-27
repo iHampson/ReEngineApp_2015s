@@ -189,20 +189,20 @@ void MyPrimitive::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubd
 	vector3 cTop(0, fHeight, 0);
 	vector3 cBase(0.0f, -fHeight, 0.0f);
 	/// Adding vectors to verts
-	for (int i = 0; i <= a_nSubdivisions; i++) {
+	for (int i = 0; i < a_nSubdivisions; i++) {
 		vector3 temp(fRad * cos(i*degreeDif * PI / 180), fHeight, fRad * sin(i*degreeDif * PI / 180));
 		topVerts.push_back(temp);
 	}
 	
-	for (int j = 0; j <= a_nSubdivisions; j++) {
+	for (int j = 0; j < a_nSubdivisions; j++) {
 		vector3 temp(fRad * cos(j*degreeDif * PI / 180), -fHeight, fRad * sin(j*degreeDif * PI / 180));
 		botVerts.push_back(temp);
 	}
 
 	if (center) {
 		/// Draw the top
-		for (int j = 0; j <= a_nSubdivisions; j++) {
-			if (j == a_nSubdivisions) {
+		for (int j = 0; j < a_nSubdivisions; j++) {
+			if (j == a_nSubdivisions-1) {
 				AddTri(topVerts[j], topVerts[0], cTop);
 			}
 			else {
@@ -211,8 +211,8 @@ void MyPrimitive::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubd
 		}
 	
 		/// Draw the bottom
-		for (int k = 0; k <= a_nSubdivisions; k++) {
-			if (k == a_nSubdivisions) {
+		for (int k = 0; k < a_nSubdivisions; k++) {
+			if (k == a_nSubdivisions-1) {
 				AddTri(cBase, botVerts[0], botVerts[k]);
 			}
 			else {
@@ -220,8 +220,8 @@ void MyPrimitive::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubd
 			}
 		}
 		/// Draw the walls
-		for (int i = 0; i <= a_nSubdivisions; i++) {
-			if (i == a_nSubdivisions) {
+		for (int i = 0; i < a_nSubdivisions; i++) {
+			if (i == a_nSubdivisions-1) {
 				AddQuad(botVerts[i], botVerts[0], topVerts[i], topVerts[0]);
 			}
 			else {
@@ -342,74 +342,73 @@ void MyPrimitive::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int 
 void MyPrimitive::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Color)
 {
 	//Sets minimum and maximum of subdivisions
-	if (a_nSubdivisions < 1)
+	if (a_nSubdivisions <= 2)
 	{
 		GenerateCube(a_fRadius * 2, a_v3Color);
 		return;
 	}
-	if (a_nSubdivisions > 6)
-		a_nSubdivisions = 6;
+	if (a_nSubdivisions > 10)
+		a_nSubdivisions = 8;
 
 	Release();
 	Init();
 
 	/// My code starts here
-	/// Think about using a 2d array from the heap to store things in rings that I can access
-	float fRad = 0.5f*a_fRadius;
-	float radRingDiff = (360 / a_nSubdivisions) * (PI/180);
+	float fRad = a_fRadius;
+	float increment = (2 * fRad) / (a_nSubdivisions-1);
+	float height = fRad+(increment/2);
+	float ringInc = (2 * PI) / a_nSubdivisions;
 
-	std::vector<vector3> verts;
-	/*vector3* *arrayVerts = new vector3*[a_nSubdivisions];
-	for (int k = 0; k < a_nSubdivisions;k++) {
-		arrayVerts[k] = new vector3[a_nSubdivisions];
-	}*/
-	vector3 cTop(0, fRad, 0);
+	vector3 cTop(0.0f, fRad, 0.0f);
 	vector3 cBot(0.0f, -fRad, 0.0f);
+	std::vector<vector3> prevRing;
 
 	for (int i = 1; i < a_nSubdivisions; i++) {
-		float step = 90 - (i*(180/a_nSubdivisions));
-
-		for (int j = 0; j <= a_nSubdivisions; j++) {
-			float x, y, z; // Coords
-			// Angles in Radians
-			
-			float ring = j*radRingDiff;
-
-			x = cos(ring)*sin(step);
-			y = sin(ring)*sin(step);
-			z = cos(step);
-			vector3 temp(x, y, z);
-			verts.push_back(temp*fRad);
-			//arrayVerts[i - 1][j] = temp;
+		height -= increment;
+		float ringRad = cos(asin(height/fRad))*fRad;
+		std::vector<vector3> currentRing;
+	
+		/// Generate verts in this ring
+		float x, y, z;
+		for (int j = 0; j < a_nSubdivisions; j++) {
+			x = ringRad*cos(j*ringInc);
+			y = height;
+			z = ringRad*sin(j*ringInc);
+			currentRing.push_back(vector3(x,y,z));
 		}
-	}
-	for each (vector3 v in verts)
-	{
-		std::cout << v.x << " , " << v.y << " , " << v.z << std::endl;
-	}
 
-	for (int i = 1;i < verts.size();i++) {
-		/*if (i == verts.size()-1) {
-			AddTri(verts[], verts[0], vector3(0, 0, 0));
-			AddTri(vector3(0, 0, 0), verts[0], verts[i]);
+		/// Attatch verts together
+		if (i == 1) {
+			for (int k = 0; k < a_nSubdivisions; k++) {
+				if (k == a_nSubdivisions - 1) {
+					AddTri(currentRing[k], currentRing[0], cTop);
+				}
+				else {
+					AddTri(currentRing[k], currentRing[k + 1], cTop);
+				}
+			}
 		}
 		else {
-			AddTri(verts[i-1], verts[i], vector3(0, 0, 0));
-			AddTri(vector3(0, 0, 0), verts[i], verts[i-1]);
-		}*/
-		if (i < a_nSubdivisions) {
-			AddTri(verts[i - 1], verts[i], cTop);
-			AddTri(cTop, verts[i], verts[i - 1]);
+			for (int k = 0; k < a_nSubdivisions; k++) {
+				if (k == a_nSubdivisions-1) {
+					AddQuad(currentRing[k], currentRing[0], prevRing[k], prevRing[0]);
+				}
+				else {
+					AddQuad(currentRing[k], currentRing[k + 1], prevRing[k], prevRing[k + 1]);
+				}
+			}
 		}
-		else if (i>((a_nSubdivisions*a_nSubdivisions) - a_nSubdivisions)) {
-			AddTri(verts[i - 1], verts[i], cBot);
-			AddTri(cBot, verts[i], verts[i - 1]);
+		prevRing = currentRing;
+	}
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		if (i == a_nSubdivisions - 1) {
+			AddTri(cBot, prevRing[0], prevRing[i]);
+		}
+		else {
+			AddTri(cBot, prevRing[i + 1], prevRing[i]);
 		}
 	}
-	//for (int k = 0; k < a_nSubdivisions;k++) {
-	//	delete[] arrayVerts[k];
-	//}
-	//delete[] arrayVerts;
+
 	/// My code ends here
 	CompileObject(a_v3Color);
 }
