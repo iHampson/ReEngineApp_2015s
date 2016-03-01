@@ -49,13 +49,19 @@ void AppClass::Update(void)
 #pragma endregion
 
 #pragma region YOUR CODE GOES HERE
-	//Calculate the position of the Earth
-	//m_m4Earth = glm::rotate(m_m4Earth, m_fEarthTimer, vector3(0.0f, 1.0f, 0.0f));
-	//m_m4Earth *= glm::rotate(m_m4Sun, m_fEarthTimer, vector3(0.0f, 1.0f, 0.0f));
-	m_m4Earth = distanceEarth;
-	//Calculate the position of the Moon
-	//m_m4Moon = glm::rotate(m_m4Moon, m_fMoonTimer, vector3(0.0f, 1.0f, 0.0f));
-	m_m4Moon = m_m4Earth*distanceMoon;
+	// Calculate the position of the Earth
+	m_m4Earth = m_m4Sun; //move the earth back to the sun each frame to start
+	m_m4Earth = glm::rotate(m_m4Earth, m_fEarthTimer, vector3(0.0f,1.0f,0.0f)); //rotate the earth based on orbit position
+	m_m4Earth *= distanceEarth; //translate to orbit position
+	
+	// Calculate the position of the Moon
+	m_m4Moon = glm::rotate(m_m4Earth, m_fEarthTimer * (365.25f / 27.0f), vector3(0.0f,1.0f,0.0f)); //move moon to earth and apply orbital rotation
+	m_m4Moon *= distanceMoon * rotateX * glm::rotate(IDENTITY_M4, 90.0f, vector3(0.0f, 0.0f, 1.0f)); //translate moon out to its orbit, tidally lock it to the earth
+	
+	// Correct the Earths rotation
+	m_m4Earth *= glm::rotate(IDENTITY_M4, -m_fEarthTimer, vector3(0.0f, 1.0f, 0.0f)) //negate orbital Y rotation of the earth because it's axial tilt isn't tidally locked to sun
+	 *glm::rotate(IDENTITY_M4, 90.0f - 23.4f, vector3(1.0f, 0.0f, 0.0f))  //apply axial tilt to the earth
+	 *glm::rotate(IDENTITY_M4, -m_fEarthTimer * 365.25f, vector3(0.0f, 0.0f, 1.0f)); //rotate for day/night cycle
 #pragma endregion
 
 #pragma region Print info
