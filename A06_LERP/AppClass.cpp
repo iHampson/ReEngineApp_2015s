@@ -24,7 +24,7 @@ void AppClass::Update(void)
 
 	//Update the mesh manager's time without updating for collision detection
 	m_pMeshMngr->Update();
-#pragma region
+#pragma endregion
 
 #pragma region Does not need changes but feel free to change anything here
 	//Lets us know how much time has passed since the last call
@@ -33,10 +33,20 @@ void AppClass::Update(void)
 	//cumulative time
 	static double fRunTime = 0.0f; //How much time has passed since the program started
 	fRunTime += fTimeSpan; 
+
+	static std::vector<vector3> verticies = {
+		vector3(-4.0f, -2.0f, 5.0f), vector3(1.0f, -2.0f, 5.0f),
+		vector3(-3.0f, -1.0f, 3.0f), vector3(2.0f,-1.0f,3.0f),
+		vector3(-2.0f, 0.0f, 0.0f), vector3(3.0f,0.0f,0.0f),
+		vector3(-1.0f,1.0f,-3.0f), vector3(4.0f,1.0f,-3.0f),
+		vector3(0.0f, 2.0f, -5.0f), vector3(5.0f,2.0f,-5.0f),
+		vector3(1.0f,3.0f,-5.0f) };
 #pragma endregion
 
 #pragma region Your Code goes here
-	m_pMeshMngr->SetModelMatrix(IDENTITY_M4, "WallEye");
+	matrix4 modelPosition = IDENTITY_M4;
+
+	m_pMeshMngr->SetModelMatrix(modelPosition, "WallEye");
 #pragma endregion
 
 #pragma region Does not need changes but feel free to change anything here
