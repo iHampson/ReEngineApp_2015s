@@ -34,19 +34,42 @@ void AppClass::Update(void)
 	static double fRunTime = 0.0f; //How much time has passed since the program started
 	fRunTime += fTimeSpan; 
 
-	static std::vector<vector3> verticies = {
+	verticies = {
 		vector3(-4.0f, -2.0f, 5.0f), vector3(1.0f, -2.0f, 5.0f),
 		vector3(-3.0f, -1.0f, 3.0f), vector3(2.0f,-1.0f,3.0f),
 		vector3(-2.0f, 0.0f, 0.0f), vector3(3.0f,0.0f,0.0f),
 		vector3(-1.0f,1.0f,-3.0f), vector3(4.0f,1.0f,-3.0f),
 		vector3(0.0f, 2.0f, -5.0f), vector3(5.0f,2.0f,-5.0f),
 		vector3(1.0f,3.0f,-5.0f) };
+
+	static int routeID = 0;
 #pragma endregion
 
 #pragma region Your Code goes here
 	matrix4 modelPosition = IDENTITY_M4;
-
-	m_pMeshMngr->SetModelMatrix(modelPosition, "WallEye");
+	vector3 rStart;
+	vector3 rEnd;
+	float rPercent = fRunTime / fDuration; // Finding where it is on the route
+	if (rPercent > 1) {	// Reseting route variables after the route is completed
+		routeID += 1;
+		fRunTime = 0;
+		rPercent = 0;
+		if (routeID == 11) { // loop routID
+			routeID = 0;
+		}
+	}
+	
+	if (routeID == 10) {  // Set the odd loop route
+		rStart = verticies[routeID];
+		rEnd = verticies[0];
+	}
+	else {  // All other routes
+		rStart = verticies[routeID];
+		rEnd = verticies[routeID + 1];
+	}
+	vector3 lerpVec = glm::lerp(rStart,rEnd,rPercent);	// How far i am from start to end
+	modelPosition = glm::translate(lerpVec);	// setup the model matrix from translating to the lerp vector
+	m_pMeshMngr->SetModelMatrix(modelPosition, "WallEye");	// Applying the model matrix now that it's been changed
 #pragma endregion
 
 #pragma region Does not need changes but feel free to change anything here
@@ -67,7 +90,11 @@ void AppClass::Display(void)
 {
 	//clear the screen
 	ClearScreen();
-
+	/// For each vert i add a sphere to the render queue
+	for (int i = 0; i < verticies.size(); i++) {
+		m_pMeshMngr->AddSphereToQueue(glm::translate(verticies[i]), RERED, WIRE);
+	}
+	
 	//Render the grid based on the camera's mode:
 	switch (m_pCameraMngr->GetCameraMode())
 	{
