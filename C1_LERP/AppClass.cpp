@@ -52,9 +52,9 @@ void AppClass::Update(void)
 	fDifference += 0.1f;
 	fDifference = MapValue(static_cast<float>(fRunTime), 0.0f, 10.0f, 0.0f, 1.0f);
 
-	float fPosition = glm::lerp(v3Start, v3End, fDifference).y;
+	float fPosition = glm::lerp(v3Start, v3End, fDifference).z;
 
-	mOrientation = glm::rotate(IDENTITY_M4, fPosition, vector3(0.0f, 1.0f, 0.0f));
+	mOrientation = glm::rotate(IDENTITY_M4, fPosition, vector3(0.0f, 0.0f, 1.0f));
 
 	m_pMeshMngr->SetModelMatrix(mOrientation, "Steve");
 	
