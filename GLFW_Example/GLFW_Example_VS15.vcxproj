@@ -69,13 +69,12 @@
       <AdditionalDependencies>glew32.lib;opengl32.lib;glu32.lib;glfw3d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir "$(SolutionDir)_Binary\"
-mkdir "$(SolutionDir)_Binary\Shaders\"
-copy "$(SolutionDir)include\OpenGL-Tutorials\shaders\*.*" "$(SolutionDir)_Binary\Shaders\"
-copy "$(SolutionDir)include\GL\bin\*.*" "$(SolutionDir)_Binary\"</Command>
+      <Command>mkdir "$(SolutionDir)_Binary\"	
+copy "$(OutDir)$(TargetName)$(TargetExt)" "$(SolutionDir)_Binary"
+</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copying binary…</Message>
+      <Message>Copy Binaries</Message>
     </PostBuildEvent>
     <Bscmake>
       <PreserveSbr>true</PreserveSbr>
@@ -98,12 +97,10 @@ copy "$(SolutionDir)include\GL\bin\*.*" "$(SolutionDir)_Binary\"</Command>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>
-      <Message>Copying binary…</Message>
-      <Command>mkdir "$(SolutionDir)_Binary\"
+      <Message>Copy Binaries</Message>
+      <Command>mkdir "$(SolutionDir)_Binary\"	
 copy "$(OutDir)$(TargetName)$(TargetExt)" "$(SolutionDir)_Binary"
-mkdir "$(SolutionDir)_Binary\Shaders\"
-copy "$(SolutionDir)include\OpenGL-Tutorials\shaders\*.*" "$(SolutionDir)_Binary\Shaders\"
-copy "$(SolutionDir)include\GL\bin\*.*" "$(SolutionDir)_Binary\"</Command>
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

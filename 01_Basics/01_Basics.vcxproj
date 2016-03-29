@@ -95,14 +95,10 @@
       <AdditionalDependencies>ReEng_VS15_d.lib;glu32.lib;glew32.lib;opengl32.lib;sfml-system.lib;sfml-window.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir "$(SolutionDir)_Binary\"
-xcopy "$(SolutionDir)include\GL\bin" "$(SolutionDir)_Binary" /y
-xcopy "$(SolutionDir)include\RE\bin\2015" "$(SolutionDir)_Binary" /y
-xcopy "$(SolutionDir)include\SFML\bin\sfml-system-2.dll" "$(SolutionDir)_Binary" /y
-xcopy "$(SolutionDir)include\SFML\bin\sfml-window-2.dll" "$(SolutionDir)_Binary" /y
-mkdir "$(SolutionDir)_Binary\Shaders\"
-xcopy "$(SolutionDir)include\RE\Shaders" "$(SolutionDir)_Binary\Shaders" /y</Command>
-      <Message>Copying files...</Message>
+      <Command>mkdir "$(SolutionDir)_Binary\"	
+copy "$(OutDir)$(TargetName)$(TargetExt)" "$(SolutionDir)_Binary"
+</Command>
+      <Message>Copy Binaries</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -130,15 +126,10 @@ xcopy "$(SolutionDir)include\RE\Shaders" "$(SolutionDir)_Binary\Shaders" /y</Com
       <AdditionalDependencies>ReEng_VS15.lib;glu32.lib;glew32.lib;opengl32.lib;sfml-system.lib;sfml-window.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir "$(SolutionDir)_Binary\"
+      <Command>mkdir "$(SolutionDir)_Binary\"	
 copy "$(OutDir)$(TargetName)$(TargetExt)" "$(SolutionDir)_Binary"
-xcopy "$(SolutionDir)include\GL\bin" "$(SolutionDir)_Binary" /y
-xcopy "$(SolutionDir)include\RE\bin\2015" "$(SolutionDir)_Binary" /y
-xcopy "$(SolutionDir)include\SFML\bin\sfml-system-2.dll" "$(SolutionDir)_Binary" /y
-xcopy "$(SolutionDir)include\SFML\bin\sfml-window-2.dll" "$(SolutionDir)_Binary" /y
-mkdir "$(SolutionDir)_Binary\Shaders\"
-xcopy "$(SolutionDir)include\RE\Shaders" "$(SolutionDir)_Binary\Shaders" /y</Command>
-      <Message>Copying files...</Message>
+</Command>
+      <Message>Copy Binaries</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
