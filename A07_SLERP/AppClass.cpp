@@ -1,7 +1,7 @@
 #include "AppClass.h"
 void AppClass::InitWindow(String a_sWindowName)
 {
-	super::InitWindow("SLERP - YOUR USER NAME GOES HERE"); // Window Name
+	super::InitWindow("SLERP - Ian Hampson"); // Window Name
 
 	//Setting the color to black
 	m_v4ClearColor = vector4(0.0f);
@@ -42,22 +42,57 @@ void AppClass::Update(void)
 	static double fRunTime = 0.0f;
 	fRunTime += fCallTime;
 
+	static int nEarthOrbits = 0;
+	static int nEarthRevolutions = 0;
+	static int nMoonOrbits = 0;
+
 	//Earth Orbit
 	double fEarthHalfOrbTime = 182.5f * m_fDay; //Earths orbit around the sun lasts 365 days / half the time for 2 stops
 	float fEarthHalfRevTime = 0.5f * m_fDay; // Move for Half a day
 	float fMoonHalfOrbTime = 14.0f * m_fDay; //Moon's orbit is 28 earth days, so half the time for half a route
+	matrix4 distanceEarth = glm::translate(11.0f, 0.0f, 0.0f);
+	matrix4 distanceMoon = glm::translate(2.0f, 0.0f, 0.0f);
+	
+	glm::quat startRot = glm::quat(vector3(0.f, 0.f, 0.f));
+	glm::quat halfRot = glm::quat(vector3(0.f, PI, 0.f));
+	float fPercentYear = MapValue(static_cast<float>(fRunTime), 0.0f, static_cast<float>(fEarthHalfOrbTime), 0.0f, 1.0f);
+
+	glm::quat earthMixOrbit = glm::mix(startRot, halfRot, fPercentYear);
+	matrix4 m_EarthOrbit = glm::mat4_cast(earthMixOrbit);
+
+	float fPercentDay = MapValue(static_cast<float>(fRunTime), 0.0f, static_cast<float>(fEarthHalfRevTime), 0.0f, 1.0f);
+	glm::quat earthMixRev = glm::mix(startRot, halfRot, fPercentDay);
+	matrix4 m_EarthRev = glm::mat4_cast(earthMixRev);
+
+	float mapValMoon = MapValue(static_cast<float>(fRunTime), 0.f, fMoonHalfOrbTime, 0.f, 1.f);
+	glm::quat moonMixRot = glm::mix(startRot, halfRot, mapValMoon);
+	matrix4 moonM4 = glm::mat4_cast(moonMixRot);
+
+	matrix4 m_m4Earth = m_EarthOrbit * distanceEarth;
+	matrix4 m_m4Moon = m_m4Earth * moonM4 * distanceMoon;
+	m_m4Earth = m_m4Earth * m_EarthRev;
+
+	m_m4Earth *= glm::scale(IDENTITY_M4, vector3(.524f));
+	m_m4Moon *= glm::scale(IDENTITY_M4, vector3(.27f));
+	matrix4 m_m4Sun = glm::scale(IDENTITY_M4, vector3(5.936f));
+
+	if (static_cast<int>(fRunTime) > nEarthRevolutions) {
+		nEarthRevolutions += 1;
+		if (nEarthRevolutions % 28 == 0) {
+			nMoonOrbits += 1;
+		}
+		if (nEarthRevolutions % 365 == 0) {
+			nEarthOrbits += 1;
+		}
+	}
 
 	//Setting the matrices
-	m_pMeshMngr->SetModelMatrix(IDENTITY_M4, "Sun");
-	m_pMeshMngr->SetModelMatrix(IDENTITY_M4, "Earth");
-	m_pMeshMngr->SetModelMatrix(IDENTITY_M4, "Moon");
+	m_pMeshMngr->SetModelMatrix(m_m4Sun, "Sun");
+	m_pMeshMngr->SetModelMatrix(m_m4Earth, "Earth");
+	m_pMeshMngr->SetModelMatrix(m_m4Moon, "Moon");
 
 	//Adds all loaded instance to the render list
 	m_pMeshMngr->AddInstanceToRenderList("ALL");
-
-	static int nEarthOrbits = 0;
-	static int nEarthRevolutions = 0;
-	static int nMoonOrbits = 0;
 
 	//Indicate the FPS
 	int nFPS = m_pSystem->GetFPS();
